@@ -1322,8 +1322,11 @@ function createTranslationInput() {
         const lastParagraph = proseMirror.querySelector('p:last-child'); // 마지막 <p> 태그 선택
 
         if (lastParagraph) {
-            // 마지막 <p> 태그에 번역된 텍스트 추가
-            lastParagraph.textContent += ' ' + translatedText;
+            // <span class="userText"> 태그로 번역된 텍스트를 감싸서 추가
+            const span = document.createElement('span');
+            span.className = 'userText';
+            span.textContent = translatedText;
+            lastParagraph.appendChild(span);
         }
 
         this.value = ''; // 입력 필드 초기화
