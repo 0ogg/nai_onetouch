@@ -66,6 +66,28 @@
     backdrop-filter: blur(30px) !important;
 }
 
+#ns-settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#setExit {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #000;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+}
+
+#setExit:hover {
+    color: #f00;
+}
+
 #ns-settings-button {
     /* 설정 오픈 버튼 스타일 */
     position: fixed;
@@ -212,12 +234,6 @@ span.hT {
 margin: 0;
     overflow: scroll;
     max-height: 200px;
-}
-
-#setExit {
-    width: 100%;
-    margin: 0 auto;
-    text-align: center;
 }
 
 #setInMenu {
@@ -519,38 +535,37 @@ h1, h2, h3 {
     document.addEventListener("mousemove", handleIconDrag);
     document.addEventListener("mouseup", handleIconDragEnd);
 
+// 설정창 ⚙️
+var nsSettingsDiv = document.createElement('div');
+nsSettingsDiv.id = 'ns-settings-div';
 
-    // 설정창 ⚙️
-    var nsSettingsDiv = document.createElement('div');
-    nsSettingsDiv.id = 'ns-settings-div';
-
-    // 설정창의 내용을 구성합니다.
-    nsSettingsDiv.innerHTML = `
-    <h2>설정</h2>
+// 설정창의 내용을 구성합니다.
+nsSettingsDiv.innerHTML = `
+    <div id="ns-settings-header">
+        <h2>설정</h2>
+        <button id="setExit" class="setBtn">×</button>
+    </div>
     <div id="setInMenu"></div>
     <div id="setInDiv"></div>
-    <button id = "setExit" class="setBtn">창닫기</button>
-  `;
-    // 생성한 설정창을 문서의 body에 추가합니다.
-    document.body.appendChild(nsSettingsDiv);
+`;
 
+// 생성한 설정창을 문서의 body에 추가합니다.
+document.body.appendChild(nsSettingsDiv);
 
-    // 설정 오픈 버튼을 생성합니다. ⛔️ 설정창 토글 버튼 비활성화
-    //⛔️    var nsSettingsButton = document.createElement('div');
-    //⛔️    nsSettingsButton.id = 'ns-settings-button';
-    // 설정 오픈 버튼을 문서의 body에 추가합니다.
-    //⛔️    document.body.appendChild(nsSettingsButton);
-
-    // 설정창 열기/닫기를 처리하는 함수
-    function toggleSettings() {
-        if (nsSettingsDiv.style.display === 'none' || nsSettingsDiv.style.display === '') {
-            tColorEx();
-            nsSettingsDiv.style.display = 'block';
-        } else {
-            nsSettingsDiv.style.display = 'none';
-        }
+// 설정창 열기/닫기를 처리하는 함수
+function toggleSettings() {
+    if (nsSettingsDiv.style.display === 'none' || nsSettingsDiv.style.display === '') {
+        tColorEx();
+        nsSettingsDiv.style.display = 'block';
+    } else {
+        nsSettingsDiv.style.display = 'none';
     }
+}
 
+// "X" 버튼 클릭 시 설정창 닫기
+document.getElementById('setExit').addEventListener('click', function() {
+    nsSettingsDiv.style.display = 'none';
+});
     // 설정 오픈 버튼의 클릭 이벤트 핸들러 등록
     //⛔️    nsSettingsButton.addEventListener('click', toggleSettings);
 
@@ -629,7 +644,7 @@ h1, h2, h3 {
         <label for="geminiPrompt">영한 번역 프롬프트: </label>
         <textarea id="geminiPrompt" style="width:100%" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요.'}</textarea><br>
         <label for="geminiKoEnPrompt">한영 번역 프롬프트: </label>
-        <textarea id="geminiKoEnPrompt" style="width:100%" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiKoEnPrompt') || '다음 한국어 텍스트를 영어로 번역해주세요.'}</textarea><br>
+        <textarea id="geminiKoEnPrompt" style="width:100%" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiKoEnPrompt') || '주어진 한글 문장을 영어로 번역하세요. 첨부된 영어 텍스트는 번역될 문장의 바로 직전 문맥입니다. 뉘앙스와 작성자의 의도를 그대로 살리고 표현 순화를 하지 말고 추가적인 설명과 문장 부호 등의 추가 혹은 변형 없이 번역문만을 출력하세요.'}</textarea><br>
         <label for="geminiDefault">Gemini를 기본 번역으로 사용</label>
         <input type="checkbox" class="ns-check" id="geminiDefault" ${localStorage.getItem('geminiDefault') === 'true' ? 'checked' : ''}>
         <label for="geminiInputEnabled">입력 번역 활성</label>
@@ -1320,8 +1335,21 @@ function createTranslationInput() {
 async function translateKoToEn(text) {
     const selectedModel = localStorage.getItem('geminiModel');
     const apiKey = localStorage.getItem('geminiApi');
-    const customPrompt = localStorage.getItem('geminiKoEnPrompt') || '다음 한국어 텍스트를 영어로 번역해주세요.';
-
+    const customPrompt = localStorage.getItem('geminiKoEnPrompt') || '주어진 한글 문장을 영어로 번역하세요. 첨부된 영어 텍스트는 번역될 문장의 바로 직전 문맥입니다. 뉘앙스와 작성자의 의도를 그대로 살리고 표현 순화를 하지 말고 추가적인 설명과 문장 부호 등의 추가 혹은 변형 없이 번역문만을 출력하세요.';
+    const engContext = engContEx();
+  function engContEx() {
+    var proseMirrorDiv = document.querySelector('.ProseMirror');
+    var paragraphs = proseMirrorDiv.querySelectorAll('p');
+    var pText = '';
+    for (var i = paragraphs.length - 1; i >= 0; i--) {
+        var paragraphText = paragraphs[i].textContent;
+        pText = paragraphText + '\n' + pText;
+        if (pText.length >= 500) {
+            break;
+        }
+    }
+    return pText
+  }
     const safetySettings = Object.values({
         HARM_CATEGORY_HARASSMENT: 'HARM_CATEGORY_HARASSMENT',
         HARM_CATEGORY_HATE_SPEECH: 'HARM_CATEGORY_HATE_SPEECH',
@@ -1343,7 +1371,7 @@ async function translateKoToEn(text) {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `${customPrompt}\n\n${text}`
+                            text: `${customPrompt}\n직전 문맥:${engContext}\n번역할 텍스트:${text}`
                         }]
                     }],
                     generationConfig: {
