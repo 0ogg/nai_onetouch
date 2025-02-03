@@ -584,6 +584,20 @@ h1, h2, h3 {
     <div id="tfList"></div>
     </div>
                       `],
+                       ['Gemini', `
+    <h3>Gemini AI 번역</h3>
+    <label for="geminiApiKey">API Key: </label>
+    <input type="text" class="ns-input" id="geminiApiKey" value="${localStorage.getItem('geminiApiKey') || ''}"><br>
+    <label for="geminiModel">모델 선택: </label>
+    <select id="geminiModel" class="ns-input">
+        <option value="gemini-pro" ${localStorage.getItem('geminiModel') === 'gemini-pro' ? 'selected' : ''}>gemini-pro</option>
+        <option value="gemini-pro-vision" ${localStorage.getItem('geminiModel') === 'gemini-pro-vision' ? 'selected' : ''}>gemini-pro-vision</option>
+    </select><br>
+    <label for="geminiPrompt">번역 프롬프트: </label>
+    <textarea id="geminiPrompt" class="ns-input" rows="4" cols="50">${localStorage.getItem('geminiPrompt') || 'Translate the following text into Korean:'}</textarea><br>
+    <label for="useGemini">Gemini를 기본 번역으로 사용</label>
+    <input type="checkbox" class="ns-check" id="useGemini" ${JSON.parse(localStorage.getItem('useGemini')) ? 'checked' : ''}>
+`]);,
                        ['DeepL',`
                        <h3>DeepL API 사용</h3>
                        <label for ="dplApi">API key: </label><input type="text" class="ns-input" id="dplApi" value="${dplApi}"><br>
