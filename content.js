@@ -1189,34 +1189,51 @@ function tfOff() {
     btnSettings.addEventListener('click', toggleSettings);
 
 // 제미나이 번역
-  // 제미나이 API를 사용한 번역 함수
-// 제미나이 API를 사용한 번역 함수 (프롬프트 적용)
-function translateWithGemini(text, callback) {
-    const apiUrl = "https://generativelanguage.googleapis.com/v1/models/" + localStorage.getItem('geminiModel') + ":generateContent";
+async function translateWithGemini(text, callback) {
+    const selectedModel = localStorage.getItem('geminiModel');
     const apiKey = localStorage.getItem('geminiApi');
-    const prompt = localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요:';
+    const customPrompt = localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요:';
 
-    const requestData = {
-        contents: [
+    // Safety settings from the first version
+    const safetySettings = Object.values({
+        HARM_CATEGORY_HARASSMENT: 'HARM_CATEGORY_HARASSMENT',
+        HARM_CATEGORY_HATE_SPEECH: 'HARM_CATEGORY_HATE_SPEECH',
+        HARM_CATEGORY_SEXUALLY_EXPLICIT: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        HARM_CATEGORY_DANGEROUS_CONTENT: 'HARM_CATEGORY_DANGEROUS_CONTENT'
+    }).map(category => ({
+        category: category,
+        threshold: selectedModel === 'gemini-2.0-flash-exp' ? 'OFF' : 'BLOCK_NONE',
+    }));
+
+    try {
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1/models/${selectedModel}:generateContent?key=${apiKey}`,
             {
-                parts: [
-                    {
-                        text: prompt + " " + text // 프롬프트와 텍스트 결합
-                    }
-                ]
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: `${customPrompt} ${text}`
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        topK: 40,
+                        topP: 0.8,
+                    },
+                    safetySettings: safetySettings
+                })
             }
-        ]
-    };
+        );
 
-    fetch(apiUrl + "?key=" + apiKey, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-    })
-    .then((response) => response.json())
-    .then((data) => {
+        if (!response.ok) {
+            throw new Error('Gemini API 요청 실패');
+        }
+
+        const data = await response.json();
         if (data.candidates && data.candidates.length > 0) {
             const translatedText = data.candidates[0].content.parts[0].text;
             callback(translatedText);
@@ -1224,11 +1241,10 @@ function translateWithGemini(text, callback) {
             console.error("Translation failed. Response:", data);
             callback("응답이 돌아오지 않았습니다.");
         }
-    })
-    .catch((error) => {
+    } catch (error) {
         console.error("Translation error:", error);
         callback("잘못된 API입니다.");
-    });
+    }
 }
     // 딥엘 api 번역
     function translateText(text, callback) {
