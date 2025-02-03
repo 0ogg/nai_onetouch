@@ -350,9 +350,6 @@ h1, h2, h3 {
         tColorEx();
         tWide.style.display = 'flex';
         getExtractedText(textExtraction);
-        if (tfStat) {
-            secTf();
-        }
     }
 
     // 확장창 클릭
