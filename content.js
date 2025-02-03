@@ -346,46 +346,53 @@ h1, h2, h3 {
     var prevText = '';
     var prevTrans = '';
     var apiN = 0;
-    function getExtractedText(length) {
-        // 본문 내용 추출
-        var proseMirrorDiv = document.querySelector('.ProseMirror');
-        var paragraphs = proseMirrorDiv.querySelectorAll('p');
-        var pText = '';
-        for (var i = paragraphs.length - 1; i >= 0; i--) {
-            var paragraphText = paragraphs[i].textContent;
-            pText = paragraphText + '\n' + pText;
-            if (pText.length >= length) {
-                break;
-            }
+   function getExtractedText(length) {
+    var proseMirrorDiv = document.querySelector('.ProseMirror');
+    var paragraphs = proseMirrorDiv.querySelectorAll('p');
+    var pText = '';
+    for (var i = paragraphs.length - 1; i >= 0; i--) {
+        var paragraphText = paragraphs[i].textContent;
+        pText = paragraphText + '\n' + pText;
+        if (pText.length >= length) {
+            break;
         }
-        // api 번역
-        if ((apiN == 0 || pText !== prevText) && (dplD || dplC !== 0)) {
-            translateText(pText, function (translatedText) {
-                apiN++
+    }
+
+    // 번역 로직
+    if ((apiN == 0 || pText !== prevText) && (dplD || geminiDefault || dplC !== 0)) {
+        if (localStorage.getItem('geminiDefault') === 'true') {
+            translateWithGemini(pText, function (translatedText) {
+                apiN++;
                 prevText = pText;
                 pText = translatedText;
                 prevTrans = pText;
-                continueProcessing(); // 번역이 완료된 후에 추가 로직 실행
+                continueProcessing();
             });
         } else {
-            // 번역이 필요하지 않은 경우 바로 추가 로직 실행
-            if (pText == prevText && (dplD || dplC !== 0)) pText = prevTrans + '\n<중복 요청>';
-            prevText = pText;
-            continueProcessing();
+            translateText(pText, function (translatedText) {
+                apiN++;
+                prevText = pText;
+                pText = translatedText;
+                prevTrans = pText;
+                continueProcessing();
+            });
         }
-
-
-        function continueProcessing() {
-            // 하이라이트 처리
-            updateTextStyle();
-            var pattern = /"([^"]+)"/g;
-            var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
-            pText = '<p class="nm">' + newText.replace(/\n/g, '</p><p class="nm">') + '</p>';
-
-            extractedText.innerHTML = pText;
-            dplC = 0;
-        }
+    } else {
+        if (pText == prevText && (dplD || geminiDefault || dplC !== 0)) pText = prevTrans + '\n<중복 요청>';
+        prevText = pText;
+        continueProcessing();
     }
+
+    function continueProcessing() {
+        updateTextStyle();
+        var pattern = /"([^"]+)"/g;
+        var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
+        pText = '<p class="nm">' + newText.replace(/\n/g, '</p><p class="nm">') + '</p>';
+
+        extractedText.innerHTML = pText;
+        dplC = 0;
+    }
+}
 
     // 아이콘 이동 함수
     // 아이콘 드래그 변수
@@ -584,6 +591,33 @@ h1, h2, h3 {
     <div id="tfList"></div>
     </div>
                       `],
+                       ['Gemini', `
+        <h3>Gemini API 사용</h3>
+        <label for="geminiApi">API key: </label>
+        <input type="text" class="ns-input" id="geminiApi" value="${localStorage.getItem('geminiApi') || ''}"><br>
+        <label for="geminiModel">모델 선택: </label>
+        <select id="geminiModel" class="ns-input">
+            <option value="gemini-2.0-flash-thinking-exp">gemini-2.0-flash-thinking-exp</option>
+            <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
+            <option value="gemini-exp-1206">gemini-exp-1206</option>
+            <option value="gemini-exp-1121">gemini-exp-1121</option>
+            <option value="gemini-1.5-pro-latest">gemini-1.5-pro-latest</option>
+            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+            <option value="gemini-1.5-pro-001">gemini-1.5-pro-001</option>
+            <option value="gemini-1.5-pro-002">gemini-1.5-pro-002</option>
+            <option value="gemini-1.5-flash-8b-latest">gemini-1.5-flash-8b-latest</option>
+            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+            <option value="gemini-1.5-flash-8b-001">gemini-1.5-flash-8b-001</option>
+            <option value="gemini-1.5-flash-latest">gemini-1.5-flash-latest</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+            <option value="gemini-1.5-flash-001">gemini-1.5-flash-001</option>
+            <option value="gemini-1.5-flash-002">gemini-1.5-flash-002</option>
+        </select><br>
+        <label for="geminiPrompt">프롬프트: </label>
+        <textarea id="geminiPrompt" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요:'}</textarea><br>
+        <label for="geminiDefault">Gemini를 기본 번역으로 사용</label>
+        <input type="checkbox" class="ns-check" id="geminiDefault" ${localStorage.getItem('geminiDefault') === 'true' ? 'checked' : ''}>
+    `],
                        ['DeepL',`
                        <h3>DeepL API 사용</h3>
                        <label for ="dplApi">API key: </label><input type="text" class="ns-input" id="dplApi" value="${dplApi}"><br>
@@ -707,16 +741,47 @@ h1, h2, h3 {
         img.src = imageUrl;
     });
 
+  // 제미나이 설정
+  
+document.getElementById('geminiApi').addEventListener('input', function () {
+    localStorage.setItem('geminiApi', this.value);
+});
+
+document.getElementById('geminiModel').addEventListener('change', function () {
+    localStorage.setItem('geminiModel', this.value);
+});
+
+document.getElementById('geminiPrompt').addEventListener('input', function () {
+    localStorage.setItem('geminiPrompt', this.value);
+});
+document.getElementById('geminiDefault').addEventListener('change', function () {
+    localStorage.setItem('geminiDefault', this.checked);
+  
+    if (this.checked) {
+        // Gemini를 기본으로 설정하면 DeepL 기본 설정 해제
+        document.getElementById('dplD').checked = false;
+        localStorage.setItem('dplD', false);
+        dplD = JSON.parse(localStorage.getItem('dplD'));
+    }
+});
+
     // 딥엘 설정
     document.getElementById('dplApi').addEventListener('input', function () {
         localStorage.setItem('dplApi', this.value);
         dplApi = localStorage.getItem('dplApi');
     });
-    document.getElementById('dplD').addEventListener('change', function () {
+   
+document.getElementById('dplD').addEventListener('change', function () {
         localStorage.setItem('dplD', this.checked);
         dplD = JSON.parse(localStorage.getItem('dplD'));
-    });
+    if (this.checked) {
+        document.getElementById('geminiDefault').checked = false;
+        localStorage.setItem('geminiDefault', false);
+    }
+}); 
 
+  //강조 실행
+ 
     function updateTextStyle() {
 
         italicActive = JSON.parse(localStorage.getItem('ns-italic'));
@@ -1102,27 +1167,8 @@ function tfOff() {
     btnLong.addEventListener('click', function () {
         extractedText.removeAttribute('translate');
         getExtractedText(1000000);
-        if (tfStat) {
-            secTf();
-        }
     });
 
-// 변환 딜레이
-    function secTf() {
-        var delayN = extractedText.innerText.length;
-            if (delayN > 9999) delayN = delayN / 80;
-           if (delayN > 14000) delayN = delayN * 0.8;
-        if (delayN < 600) delayN = 600;
-
-
-        extractedText.style.fontSize = '0.2px';
-        setTimeout(() => {
-            extractedText.style.fontSize = ''; // 기본 크기로 복구
-        }, delayN - 50);
-        setTimeout(replaceText, delayN);
-
-
-    }
     //복사
     var btnCopy = document.querySelector('#btnCopy');
     btnCopy.addEventListener('click', function () {
@@ -1142,7 +1188,48 @@ function tfOff() {
     var btnSettings = document.querySelector('#btnSettings');
     btnSettings.addEventListener('click', toggleSettings);
 
+// 제미나이 번역
+  // 제미나이 API를 사용한 번역 함수
+// 제미나이 API를 사용한 번역 함수 (프롬프트 적용)
+function translateWithGemini(text, callback) {
+    const apiUrl = "https://generativelanguage.googleapis.com/v1/models/" + localStorage.getItem('geminiModel') + ":generateContent";
+    const apiKey = localStorage.getItem('geminiApi');
+    const prompt = localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요:';
 
+    const requestData = {
+        contents: [
+            {
+                parts: [
+                    {
+                        text: prompt + " " + text // 프롬프트와 텍스트 결합
+                    }
+                ]
+            }
+        ]
+    };
+
+    fetch(apiUrl + "?key=" + apiKey, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.candidates && data.candidates.length > 0) {
+            const translatedText = data.candidates[0].content.parts[0].text;
+            callback(translatedText);
+        } else {
+            console.error("Translation failed. Response:", data);
+            callback("응답이 돌아오지 않았습니다.");
+        }
+    })
+    .catch((error) => {
+        console.error("Translation error:", error);
+        callback("잘못된 API입니다.");
+    });
+}
     // 딥엘 api 번역
     function translateText(text, callback) {
         const apiUrl = "https://api-free.deepl.com/v2/translate";
