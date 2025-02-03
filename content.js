@@ -372,7 +372,6 @@ h1, h2, h3 {
     // 스크립트 추출
     var prevText = '';
     var prevTrans = '';
-    var apiN = 0;
    function getExtractedText(length) {
     var proseMirrorDiv = document.querySelector('.ProseMirror');
     var paragraphs = proseMirrorDiv.querySelectorAll('p');
@@ -386,10 +385,9 @@ h1, h2, h3 {
     }
 
     // 번역 로직
-    if ((apiN == 0) && (dplD || geminiDefault || dplC !== 0)) {
+    if (dplD || geminiDefault || dplC !== 0)) {
         if (localStorage.getItem('geminiDefault') === 'true') {
             translateWithGemini(pText, function (translatedText) {
-                apiN++;
                 prevText = pText;
                 pText = translatedText;
                 prevTrans = pText;
@@ -397,7 +395,6 @@ h1, h2, h3 {
             });
         } else {
             translateText(pText, function (translatedText) {
-                apiN++;
                 prevText = pText;
                 pText = translatedText;
                 prevTrans = pText;
