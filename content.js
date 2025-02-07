@@ -1237,7 +1237,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     var btnLong = document.querySelector('#btnLong');
     btnLong.addEventListener('click', function() {
         extractedText.removeAttribute('translate');
-        getExtractedText(1000000);
+  loadAllContent().then(() => {
+    getExtractedText(1000000, 'summary'); // 요약 모드로 호출
+  });
     });
 
     //요약
@@ -1300,12 +1302,12 @@ async function loadAllContent() {
       proseMirrorDiv.dispatchEvent(new Event('scroll'));
       
       // 새로운 컨텐츠가 로딩될 시간 대기
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 900));
       
       // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
       if (proseMirrorDiv.scrollHeight === previousHeight) {
         // 한번 더 확인을 위해 추가 대기
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1200));
         if (proseMirrorDiv.scrollHeight === previousHeight) {
           break;
         }
