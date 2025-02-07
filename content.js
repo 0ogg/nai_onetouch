@@ -1287,9 +1287,6 @@ async function loadAllContent() {
   }
 
   try {
-    // 현재 스크롤 위치 저장
-    const originalScrollTop = proseMirrorDiv.scrollTop;
-    
     let previousHeight = proseMirrorDiv.scrollHeight;
     let attempts = 0;
     const maxAttempts = 20; // 최대 시도 횟수 증가
@@ -1317,8 +1314,8 @@ async function loadAllContent() {
       attempts++;
     }
 
-    // 모든 컨텐츠 로딩이 완료된 후 원래 스크롤 위치로 복귀
-    proseMirrorDiv.scrollTop = originalScrollTop;
+    // 모든 컨텐츠 로딩이 완료된 후 스크롤을 최하단으로 이동
+    proseMirrorDiv.scrollTop = proseMirrorDiv.scrollHeight;
   } catch (error) {
     console.error('Error loading content:', error);
   }
