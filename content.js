@@ -1272,7 +1272,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
 
 
         proseMirrorContainer.scrollTo({
-            top: proseMirrorContainer.scrollHeight,
+            top: 0,
             behavior: 'smooth'
         });
         getExtractedText(1000000, 'summary'); // 요약 모드로 호출
