@@ -1261,21 +1261,22 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     });
 
     // 요약 버튼 생성
+var summaryButton = document.createElement('div');
+summaryButton.id = 'btnSummary';
+summaryButton.className = 'longCopyBtn';
+summaryButton.textContent = '요약';
 
-    var summaryButton = document.createElement('div');
-    summaryButton.id = 'btnSummary';
-    summaryButton.className = 'longCopyBtn';
-    summaryButton.textContent = '요약';
+summaryButton.addEventListener('click', function() {
+  loadAllContent().then(() => {
+    getExtractedText(1000000, 'summary'); // 요약 모드로 호출
+  });
+});
 
-    summaryButton.addEventListener('click', function() {
-      loadAllContent();
-        getExtractedText(1000000, 'summary'); // 요약 모드로 호출
-    });
-    if (localStorage.getItem('geminiSummaryEnabled')) {
-        longCopy.appendChild(summaryButton);
-    }
-  
-  async function loadAllContent() {
+if (localStorage.getItem('geminiSummaryEnabled')) {
+  longCopy.appendChild(summaryButton);
+}
+
+async function loadAllContent() {
   const proseMirrorDiv = document.querySelector('.conversation-main');
   
   if (!proseMirrorDiv) {
@@ -1284,6 +1285,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
   }
 
   try {
+    // 현재 스크롤 위치 저장
+    const originalScrollTop = proseMirrorDiv.scrollTop;
+    
     let previousHeight = proseMirrorDiv.scrollHeight;
     let attempts = 0;
     const maxAttempts = 20; // 최대 시도 횟수 증가
@@ -1296,12 +1300,12 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
       proseMirrorDiv.dispatchEvent(new Event('scroll'));
       
       // 새로운 컨텐츠가 로딩될 시간 대기
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
       if (proseMirrorDiv.scrollHeight === previousHeight) {
         // 한번 더 확인을 위해 추가 대기
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         if (proseMirrorDiv.scrollHeight === previousHeight) {
           break;
         }
@@ -1310,6 +1314,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
       previousHeight = proseMirrorDiv.scrollHeight;
       attempts++;
     }
+
+    // 모든 컨텐츠 로딩이 완료된 후 원래 스크롤 위치로 복귀
+    proseMirrorDiv.scrollTop = originalScrollTop;
   } catch (error) {
     console.error('Error loading content:', error);
   }
