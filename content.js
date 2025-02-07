@@ -13,7 +13,23 @@
     --tMini-url: none;
     --tMini-size: 30px;
 }
-
+.loading {
+  animation: bounce 0.8s infinite; /* 애니메이션 이름, 지속 시간, 반복 횟수 */
+}
+@keyframes bounce {
+  0% {
+    transform: translateY(0) scaleY(1); /* 초기 상태 */
+  }
+  40% {
+    transform: translateY(-15px) scaleY(1); /* 정점 */
+  }
+  70% {
+    transform: translateY(-5px) scaleY(1); /* 아래로 내려올 때 짜부 */
+  }
+  100% {
+    transform: translateY(0) scaleX(1.1) scaleY(0.75); /* 원래 상태 */
+  }
+}
 #t-mini {
     display: flex;
     cursor: pointer;
@@ -390,9 +406,11 @@ h1, h2, h3 {
 
         // 번역 또는 요약 로직
         if (dplD || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
+            tMini.classList.add('loading');
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
-                    extractedText.innerHTML = `<p class="nm">${summaryText}</p>`;
+                    extractedText.innerHTML = `${summaryText}`;
+                    tMini.classList.remove('loading');
                 });
             } else if (localStorage.getItem('geminiDefault') === 'true') {
                 sendGeminiRequest(pText, 'translate', function(translatedText) {
@@ -414,9 +432,7 @@ h1, h2, h3 {
         }
 
         function continueProcessing() {
-          console.log('dplD:', dplD);
-console.log('geminiDefault:', geminiDefault);
-console.log('dplC:', dplC);
+            tMini.classList.remove('loading');
             updateTextStyle();
             var pattern = /"([^"]+)"/g;
             var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
@@ -677,8 +693,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     </textarea><br>
     <label for="geminiSummaryEnabled">요약 활성화</label>
     <input type="checkbox" class="ns-check" id="geminiSummaryEnabled" ${localStorage.getItem('geminiSummaryEnabled') === 'true' ? 'checked' : ''}>
-`]
-,
+`],
         ['DeepL', `
                        <h3>DeepL API 사용</h3>
                        <label for ="dplApi">API key: </label><input type="text" class="ns-input" id="dplApi" value="${dplApi}"><br>
@@ -1240,9 +1255,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     var btnLong = document.querySelector('#btnLong');
     btnLong.addEventListener('click', function() {
         extractedText.removeAttribute('translate');
-  loadAllContent().then(() => {
-    getExtractedText(1000000);
-  });
+        loadAllContent().then(() => {
+            getExtractedText(1000000);
+        });
     });
 
     //요약
@@ -1266,63 +1281,63 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     });
 
     // 요약 버튼 생성
-var summaryButton = document.createElement('div');
-summaryButton.id = 'btnSummary';
-summaryButton.className = 'longCopyBtn';
-summaryButton.textContent = '요약';
+    var summaryButton = document.createElement('div');
+    summaryButton.id = 'btnSummary';
+    summaryButton.className = 'longCopyBtn';
+    summaryButton.textContent = '요약';
 
-summaryButton.addEventListener('click', function() {
-  loadAllContent().then(() => {
-    getExtractedText(1000000, 'summary'); // 요약 모드로 호출
-  });
-});
+    summaryButton.addEventListener('click', function() {
+        loadAllContent().then(() => {
+            getExtractedText(1000000, 'summary'); // 요약 모드로 호출
+        });
+    });
 
-if (localStorage.getItem('geminiSummaryEnabled')) {
-  longCopy.appendChild(summaryButton);
-}
-
-async function loadAllContent() {
-  const proseMirrorDiv = document.querySelector('.conversation-main');
-  
-  if (!proseMirrorDiv) {
-    console.log('ProseMirror element not found');
-    return;
-  }
-
-  try {
-    let previousHeight = proseMirrorDiv.scrollHeight;
-    let attempts = 0;
-    const maxAttempts = 20; // 최대 시도 횟수 증가
-
-    while (attempts < maxAttempts) {
-      // 스크롤을 최상단으로 강제 이동
-      proseMirrorDiv.scrollTop = 0;
-      
-      // 스크롤 이벤트 발생시키기
-      proseMirrorDiv.dispatchEvent(new Event('scroll'));
-      
-      // 새로운 컨텐츠가 로딩될 시간 대기
-      await new Promise(resolve => setTimeout(resolve, 900));
-      
-      // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
-      if (proseMirrorDiv.scrollHeight === previousHeight) {
-        // 한번 더 확인을 위해 추가 대기
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        if (proseMirrorDiv.scrollHeight === previousHeight) {
-          break;
-        }
-      }
-      
-      previousHeight = proseMirrorDiv.scrollHeight;
-      attempts++;
+    if (localStorage.getItem('geminiSummaryEnabled')) {
+        longCopy.appendChild(summaryButton);
     }
 
-    // 모든 컨텐츠 로딩이 완료된 후 스크롤을 최하단으로 이동
-    proseMirrorDiv.scrollTop = proseMirrorDiv.scrollHeight;
-  } catch (error) {
-    console.error('Error loading content:', error);
-  }
-}
+    async function loadAllContent() {
+        const proseMirrorDiv = document.querySelector('.conversation-main');
+
+        if (!proseMirrorDiv) {
+            console.log('ProseMirror element not found');
+            return;
+        }
+
+        try {
+            let previousHeight = proseMirrorDiv.scrollHeight;
+            let attempts = 0;
+            const maxAttempts = 20; // 최대 시도 횟수 증가
+
+            while (attempts < maxAttempts) {
+                // 스크롤을 최상단으로 강제 이동
+                proseMirrorDiv.scrollTop = 0;
+
+                // 스크롤 이벤트 발생시키기
+                proseMirrorDiv.dispatchEvent(new Event('scroll'));
+
+                // 새로운 컨텐츠가 로딩될 시간 대기
+                await new Promise(resolve => setTimeout(resolve, 900));
+
+                // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
+                if (proseMirrorDiv.scrollHeight === previousHeight) {
+                    // 한번 더 확인을 위해 추가 대기
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    if (proseMirrorDiv.scrollHeight === previousHeight) {
+                        break;
+                    }
+                }
+
+                previousHeight = proseMirrorDiv.scrollHeight;
+                attempts++;
+            }
+
+            // 모든 컨텐츠 로딩이 완료된 후 스크롤을 최하단으로 이동
+            proseMirrorDiv.scrollTop = proseMirrorDiv.scrollHeight;
+        } catch (error) {
+            console.error('Error loading content:', error);
+        }
+    }
 
     //복사
     var btnCopy = document.querySelector('#btnCopy');
