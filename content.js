@@ -389,7 +389,7 @@ h1, h2, h3 {
         }
 
         // 번역 또는 요약 로직
-        if (dplD || geminiDefault || dplC !== 0) {
+        if (dplD || localStorage.getItem('geminiDefault') || dplC !== 0) {
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
                     extractedText.innerHTML = `<p class="nm">${summaryText}</p>`;
