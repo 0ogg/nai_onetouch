@@ -1275,8 +1275,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
         longCopy.appendChild(summaryButton);
     }
   
-async function loadAllContent() {
-  // ProseMirror div 요소 찾기
+  async function loadAllContent() {
   const proseMirrorDiv = document.querySelector('.ProseMirror');
   
   if (!proseMirrorDiv) {
@@ -1284,39 +1283,38 @@ async function loadAllContent() {
     return;
   }
 
-  // 이전 스크롤 위치 저장
-  const originalScrollTop = proseMirrorDiv.scrollTop;
-  
-  // 최상단으로 스크롤
-  proseMirrorDiv.scrollTop = 0;
-  
-  // 요소가 로딩될 때까지 대기
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // 모든 p 태그가 로딩될 때까지 반복
-  let previousHeight = proseMirrorDiv.scrollHeight;
-  let attempts = 0;
-  const maxAttempts = 10; // 무한 루프 방지
+  try {
+    let previousHeight = proseMirrorDiv.scrollHeight;
+    let attempts = 0;
+    const maxAttempts = 20; // 최대 시도 횟수 증가
 
-  while (attempts < maxAttempts) {
-    // 스크롤을 최상단으로 올림
-    proseMirrorDiv.scrollTop = 0;
-    
-    // 새로운 컨텐츠가 로딩될 시간 대기
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
-    if (proseMirrorDiv.scrollHeight === previousHeight) {
-      break;
+    while (attempts < maxAttempts) {
+      // 스크롤을 최상단으로 강제 이동
+      proseMirrorDiv.scrollTop = 0;
+      
+      // 스크롤 이벤트 발생시키기
+      proseMirrorDiv.dispatchEvent(new Event('scroll'));
+      
+      // 새로운 컨텐츠가 로딩될 시간 대기
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
+      if (proseMirrorDiv.scrollHeight === previousHeight) {
+        // 한번 더 확인을 위해 추가 대기
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        if (proseMirrorDiv.scrollHeight === previousHeight) {
+          break;
+        }
+      }
+      
+      previousHeight = proseMirrorDiv.scrollHeight;
+      attempts++;
     }
-    
-    previousHeight = proseMirrorDiv.scrollHeight;
-    attempts++;
+  } catch (error) {
+    console.error('Error loading content:', error);
   }
-
-  // 원래 스크롤 위치로 복귀 (필요한 경우)
-  proseMirrorDiv.scrollTop = originalScrollTop;
 }
+
     //복사
     var btnCopy = document.querySelector('#btnCopy');
     btnCopy.addEventListener('click', function() {
