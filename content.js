@@ -1238,7 +1238,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     btnLong.addEventListener('click', function() {
         extractedText.removeAttribute('translate');
   loadAllContent().then(() => {
-    getExtractedText(1000000, 'summary'); // 요약 모드로 호출
+    getExtractedText(1000000);
   });
     });
 
