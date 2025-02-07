@@ -674,8 +674,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     </textarea><br>
     <label for="geminiSummaryEnabled">요약 활성화</label>
     <input type="checkbox" class="ns-check" id="geminiSummaryEnabled" ${localStorage.getItem('geminiSummaryEnabled') === 'true' ? 'checked' : ''}>
-`]
-,
+`],
         ['DeepL', `
                        <h3>DeepL API 사용</h3>
                        <label for ="dplApi">API key: </label><input type="text" class="ns-input" id="dplApi" value="${dplApi}"><br>
@@ -1268,11 +1267,20 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     summaryButton.textContent = '요약';
 
     summaryButton.addEventListener('click', function() {
+        // ProseMirror 컨테이너를 찾습니다. (예: div 요소)
+        const proseMirrorContainer = document.querySelector('.ProseMirror'); // 적절한 선택자로 변경
+
+
+        proseMirrorContainer.scrollTo({
+            top: proseMirrorContainer.scrollHeight,
+            behavior: 'smooth'
+        });
         getExtractedText(1000000, 'summary'); // 요약 모드로 호출
     });
     if (localStorage.getItem('geminiSummaryEnabled')) {
         longCopy.appendChild(summaryButton);
     }
+
 
     //복사
     var btnCopy = document.querySelector('#btnCopy');
