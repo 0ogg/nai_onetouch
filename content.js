@@ -674,7 +674,8 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     </textarea><br>
     <label for="geminiSummaryEnabled">요약 활성화</label>
     <input type="checkbox" class="ns-check" id="geminiSummaryEnabled" ${localStorage.getItem('geminiSummaryEnabled') === 'true' ? 'checked' : ''}>
-`],
+`]
+,
         ['DeepL', `
                        <h3>DeepL API 사용</h3>
                        <label for ="dplApi">API key: </label><input type="text" class="ns-input" id="dplApi" value="${dplApi}"><br>
@@ -1267,21 +1268,55 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     summaryButton.textContent = '요약';
 
     summaryButton.addEventListener('click', function() {
-        // ProseMirror 컨테이너를 찾습니다. (예: div 요소)
-        const proseMirrorContainer = document.querySelector('.ProseMirror'); // 적절한 선택자로 변경
-
-
-        proseMirrorContainer.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+      loadAllContent();
         getExtractedText(1000000, 'summary'); // 요약 모드로 호출
     });
     if (localStorage.getItem('geminiSummaryEnabled')) {
         longCopy.appendChild(summaryButton);
     }
+  
+async function loadAllContent() {
+  // ProseMirror div 요소 찾기
+  const proseMirrorDiv = document.querySelector('.ProseMirror');
+  
+  if (!proseMirrorDiv) {
+    console.log('ProseMirror element not found');
+    return;
+  }
 
+  // 이전 스크롤 위치 저장
+  const originalScrollTop = proseMirrorDiv.scrollTop;
+  
+  // 최상단으로 스크롤
+  proseMirrorDiv.scrollTop = 0;
+  
+  // 요소가 로딩될 때까지 대기
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // 모든 p 태그가 로딩될 때까지 반복
+  let previousHeight = proseMirrorDiv.scrollHeight;
+  let attempts = 0;
+  const maxAttempts = 10; // 무한 루프 방지
 
+  while (attempts < maxAttempts) {
+    // 스크롤을 최상단으로 올림
+    proseMirrorDiv.scrollTop = 0;
+    
+    // 새로운 컨텐츠가 로딩될 시간 대기
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 높이 변화가 없다면 모든 컨텐츠가 로딩된 것
+    if (proseMirrorDiv.scrollHeight === previousHeight) {
+      break;
+    }
+    
+    previousHeight = proseMirrorDiv.scrollHeight;
+    attempts++;
+  }
+
+  // 원래 스크롤 위치로 복귀 (필요한 경우)
+  proseMirrorDiv.scrollTop = originalScrollTop;
+}
     //복사
     var btnCopy = document.querySelector('#btnCopy');
     btnCopy.addEventListener('click', function() {
