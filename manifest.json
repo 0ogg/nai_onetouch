@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "깡갤 노벨 AI 원터치 번역",
-  "version": "3.2",
+  "version": "3.3",
   "description": "novel ai 보조툴",
   "permissions": ["scripting", "activeTab"],
   "content_scripts": [
