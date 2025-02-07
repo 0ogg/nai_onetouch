@@ -414,6 +414,9 @@ h1, h2, h3 {
         }
 
         function continueProcessing() {
+          console.log('dplD:', dplD);
+console.log('geminiDefault:', geminiDefault);
+console.log('dplC:', dplC);
             updateTextStyle();
             var pattern = /"([^"]+)"/g;
             var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
