@@ -407,11 +407,9 @@ h1, h2, h3 {
 
         // 번역 또는 요약 로직
         if (dplD || mode === 'summary' || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
-            tMini.classList.add('loading');
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
                     extractedText.innerHTML = `${summaryText}`;
-                    tMini.classList.remove('loading');
                 });
             } else if (localStorage.getItem('geminiDefault') === 'true') {
                 sendGeminiRequest(pText, 'translate', function(translatedText) {
@@ -433,7 +431,6 @@ h1, h2, h3 {
         }
 
         function continueProcessing() {
-            tMini.classList.remove('loading');
             updateTextStyle();
             var pattern = /"([^"]+)"/g;
             var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
@@ -1420,6 +1417,8 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
 
     // Gemini API 요청 통합 함수🚩
     async function sendGeminiRequest(text, mode, callback) {
+
+        tMini.classList.add('loading');
         const selectedModel = localStorage.getItem('geminiModel');
         const apiKey = localStorage.getItem('geminiApi');
         let prompt;
@@ -1490,6 +1489,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
         } catch (error) {
             console.error("요청 오류:", error);
             callback("API 오류가 발생했습니다.");
+        } finally {
+
+            tMini.classList.remove('loading');
         }
     }
 
@@ -1538,6 +1540,8 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
 
     // 딥엘 api 번역
     function translateText(text, callback) {
+
+        tMini.classList.add('loading');
         const apiUrl = "https://api-free.deepl.com/v2/translate";
         const requestData = {
             auth_key: dplApi,
@@ -1568,6 +1572,10 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
             .catch((error) => {
                 console.error("Translation error:", error);
                 callback("잘못된 api입니다."); // 빈 문자열로 콜백 호출
+            })
+
+            .finally(() => {
+                tMini.classList.remove('loading');
             });
     }
 })();
