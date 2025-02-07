@@ -68,14 +68,14 @@
 
 #ns-settings-div {
     /* 설정창 스타일 */
-    width: 240px;
+    width: 250px;
     height: 500px;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: var(--Tmain-color);
-    padding: 20px;
+    padding: 10px 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     display: none;
     z-index: 9999;
@@ -86,7 +86,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    padding: 0;
+    margin: 0;
 }
 
 #setExit {
@@ -405,7 +406,7 @@ h1, h2, h3 {
         }
 
         // 번역 또는 요약 로직
-        if (dplD || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
+        if (dplD || mode === 'summary' || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
             tMini.classList.add('loading');
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
@@ -573,7 +574,7 @@ h1, h2, h3 {
     nsSettingsDiv.innerHTML = `
     <div id="ns-settings-header">
         <h2>설정</h2>
-        <button id="setExit" class="setBtn">×</button>
+        <button id="setExit" class="setBtn">✕</button>
     </div>
     <div id="setInMenu"></div>
     <div id="setInDiv"></div>
@@ -676,8 +677,8 @@ h1, h2, h3 {
         <textarea id="geminiPrompt" style="width:100%" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiPrompt') || '다음 영어 텍스트를 한국어로 번역해주세요.'}</textarea><br>
         <label for="geminiKoEnPrompt">한영 번역 프롬프트: </label>
         <textarea id="geminiKoEnPrompt" style="width:100%" class="ns-input" rows="3" cols="50">${localStorage.getItem('geminiKoEnPrompt') || '주어진 한글 문장을 영어로 번역하세요. 첨부된 영어 텍스트는 번역될 문장의 바로 직전 문맥입니다. 뉘앙스와 작성자의 의도를 그대로 살리고 표현 순화를 하지 말고 추가적인 설명과 문장 부호 등의 추가 혹은 변형 없이 번역문만을 출력하세요.'}</textarea><br>
-        <label for="geminiDefault">Gemini를 기본 번역으로 사용</label>
-        <input type="checkbox" class="ns-check" id="geminiDefault" ${localStorage.getItem('geminiDefault') === 'true' ? 'checked' : ''}>
+        <label for="geminiDefault">Gemini를 기본으로 사용</label>
+        <input type="checkbox" class="ns-check" id="geminiDefault" ${localStorage.getItem('geminiDefault') === 'true' ? 'checked' : ''}><br>
         <label for="geminiInputEnabled">입력 번역 활성</label>
         <input type="checkbox" class="ns-check" id="geminiInputEnabled" ${localStorage.getItem('geminiInputEnabled') === 'true' ? 'checked' : ''}>
 
