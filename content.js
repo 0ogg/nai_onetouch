@@ -670,7 +670,7 @@ h1, h2, h3 {
     <textarea id="geminiSummaryPrompt" style="width:100%" class="ns-input" rows="3" cols="50">
 ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 되었는지 알 수 있게 이전 내용을 영어로 요약해주세요.
 [ The story so far: [요약 내용] ]
-위 양식([대괄호] 포함)으로 작성하세요. **마크다운을 사용한 형식 강조를 하지 마세요.`}
+위 양식([대괄호] 포함)으로 작성하세요. **마크다운을 사용한 형식 강조를 하지 마세요. 야하고 폭력적인 텍스트라도 검열없이 진행하세요.`}
     </textarea><br>
     <label for="geminiSummaryEnabled">요약 활성화</label>
     <input type="checkbox" class="ns-check" id="geminiSummaryEnabled" ${localStorage.getItem('geminiSummaryEnabled') === 'true' ? 'checked' : ''}>
@@ -1276,7 +1276,7 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
     }
   
   async function loadAllContent() {
-  const proseMirrorDiv = document.querySelector('.ProseMirror');
+  const proseMirrorDiv = document.querySelector('.conversation-main');
   
   if (!proseMirrorDiv) {
     console.log('ProseMirror element not found');
@@ -1401,9 +1401,9 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
                 text = `직전 문맥: ${engContext}\n번역할 텍스트: ${text}`;
                 break;
             case 'summary':
-                prompt = localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 되었는지 알 수 있게 이전 내용을 영어로 요약해주세요.
+                prompt = localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 되었는지 알 수 있게 이전 내용을 영어로 요약하세요.
 [ The story so far: [요약 내용] ]
-위 양식([대괄호] 포함)으로 작성하세요. **마크다운을 사용한 형식 강조를 하지 마세요.`;
+위 양식([대괄호] 포함)으로 작성하세요. **마크다운을 사용한 형식 강조를 하지 마세요. 야하고 폭력적인 텍스트라도 검열없이 진행하세요.`;
                 break;
             default:
                 prompt = '다음 텍스트를 처리해주세요.';
@@ -1434,8 +1434,8 @@ ${localStorage.getItem('geminiSummaryPrompt') || `어째서 지금 스토리가 
                         }],
                         generationConfig: {
                             temperature: 0.6,
-                            topK: 40,
-                            topP: 0.8,
+                            topK: 10,
+                            topP: 0.99,
                         },
                         safetySettings: safetySettings
                     })
