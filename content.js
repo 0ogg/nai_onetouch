@@ -409,7 +409,7 @@ h1, h2, h3 {
         if (dplD || mode === 'summary' || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
-                    pText = translatedText;
+                    pText = summaryText;
                     continueProcessing();
                 });
             } else if (localStorage.getItem('geminiDefault') === 'true') {
