@@ -409,7 +409,8 @@ h1, h2, h3 {
         if (dplD || mode === 'summary' || localStorage.getItem('geminiDefault') === 'true' || dplC !== 0) {
             if (mode === 'summary') {
                 sendGeminiRequest(pText, 'summary', function(summaryText) {
-                    extractedText.innerHTML = `${summaryText}`;
+                    pText = translatedText;
+                    continueProcessing();
                 });
             } else if (localStorage.getItem('geminiDefault') === 'true') {
                 sendGeminiRequest(pText, 'translate', function(translatedText) {
@@ -435,6 +436,18 @@ h1, h2, h3 {
             var pattern = /"([^"]+)"/g;
             var newText = pText.replace(pattern, '<span class="hT">"$1"</span>');
             pText = '<p class="nm">' + newText.replace(/\n/g, '</p><p class="nm">') + '</p>';
+            // 제목 변환 (## 제목 => <h2>제목</h2>)
+            pText = pText.replace(/^## (.*$)/gm, "<h2>$1</h2>");
+            pText = pText.replace(/^# (.*$)/gm, "<h1>$1</h1>");
+
+            // 굵은 글씨 변환 (**텍스트** -> <b>텍스트</b>)
+            pText = pText.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
+
+            // 리스트 변환 (- 항목 -> <ul><li>항목</li></ul>)
+            pText = pText.replace(/^- (.*)$/gm, "<ul><li>$1</li></ul>");
+
+            // 여러 개의 <ul> 태그가 연속될 경우 하나로 합침
+            pText = pText.replace(/<\/ul>\n<ul>/g, "");
 
             extractedText.innerHTML = pText;
             dplC = 0;
