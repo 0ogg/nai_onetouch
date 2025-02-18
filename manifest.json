@@ -6,7 +6,7 @@
   "permissions": ["scripting", "activeTab"],
   "content_scripts": [
     {
-      "matches": ["https://noverai.net/image"],
+      "matches": ["https://novelai.net/image"],
       "js": ["Nai_preset.js"]
     },
     {
