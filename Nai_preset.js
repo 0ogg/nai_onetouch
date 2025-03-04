@@ -1,13 +1,3 @@
-// ==UserScript==
-// @name         NovelAI 프롬프트 프리셋 매니저
-// @namespace    http://tampermonkey.net/
-// @version      1.51
-// @description
-// @author       Claude
-// @match        https://novelai.net/image*
-// @grant        none
-// ==/UserScript==
-
 (function() {
     'use strict';
 
