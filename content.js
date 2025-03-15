@@ -453,128 +453,126 @@ h1, h2, h3 {
             dplC = 0;
         }
     }
+// 아이콘 이동 함수
+// 아이콘 드래그 변수
+let offsetX, offsetY, isDragging = false;
+let dragTimeout;
 
-    // 아이콘 이동 함수
-    // 아이콘 드래그 변수
-    let offsetX, offsetY, isDragging = false;
-    let dragTimeout;
+// 로컬 스토리지에서 위치 정보를 불러오고 적용합니다.
+const savedPosition = localStorage.getItem("tBallP");
+if (savedPosition) {
+    const { right, bottom } = JSON.parse(savedPosition);
+    tMini.style.right = right + "px";
+    tMini.style.bottom = bottom + "px";
+}
 
-    // 로컬 스토리지에서 위치 정보를 불러오고 적용합니다.
-    const savedPosition = localStorage.getItem("tBallP");
-    if (savedPosition) {
-        const {
-            right,
-            bottom
-        } = JSON.parse(savedPosition);
-        tMini.style.right = right + "px";
-        tMini.style.bottom = bottom + "px";
-    }
+// 아이콘 이동 함수
+function handleIconMouseDown(e) {
+    if (isDragging) return; // 드래그 중이면 클릭 이벤트를 차단
 
-    // 아이콘 이동 함수
-    function handleIconMouseDown(e) {
-        // 마우스 다운 이벤트가 발생하면 타임아웃을 설정하고 클릭을 길게 눌렀는지 확인합니다.
-        dragTimeout = setTimeout(function() {
-            isDragging = true;
+    // 마우스 다운 이벤트가 발생하면 타임아웃을 설정하고 클릭을 길게 눌렀는지 확인합니다.
+    dragTimeout = setTimeout(function() {
+        isDragging = true;
 
-            // 드래그가 시작된 위치 저장
-            offsetX = e.clientX - tMini.getBoundingClientRect().right + tMini.offsetWidth;
-            offsetY = e.clientY - tMini.getBoundingClientRect().bottom + tMini.offsetHeight;
+        // 드래그가 시작된 위치 저장
+        offsetX = e.clientX - tMini.getBoundingClientRect().right + tMini.offsetWidth;
+        offsetY = e.clientY - tMini.getBoundingClientRect().bottom + tMini.offsetHeight;
+    }, 300);
 
+    // 이벤트 기본 동작 막기
+    e.preventDefault();
+}
 
-        }, 300);
+function handleIconDrag(e) {
+    if (!isDragging) return;
+    // 이벤트 기본 동작 막기
+    e.preventDefault();
 
-        // 이벤트 기본 동작 막기
-        e.preventDefault();
-    }
+    // 새로운 위치 계산
+    let right = window.innerWidth - e.clientX - offsetX;
+    let bottom = window.innerHeight - e.clientY - offsetY;
 
-    function handleIconDrag(e) {
-        if (!isDragging) return;
-        // 이벤트 기본 동작 막기
-        e.preventDefault();
+    // div를 새 위치로 이동
+    right = Math.min(Math.max(0, right), window.innerWidth - tMini.offsetWidth);
+    bottom = Math.min(Math.max(0, bottom), window.innerHeight - tMini.offsetHeight);
 
-        // 새로운 위치 계산
-        let right = window.innerWidth - e.clientX - offsetX;
-        let bottom = window.innerHeight - e.clientY - offsetY;
+    tMini.style.right = right + "px";
+    tMini.style.bottom = bottom + "px";
+}
 
-        // div를 새 위치로 이동
-        right = Math.min(Math.max(0, right), window.innerWidth - tMini.offsetWidth);
-        bottom = Math.min(Math.max(0, bottom), window.innerHeight - tMini.offsetHeight);
+function handleIconDragEnd() {
+    isDragging = false;
 
-        tMini.style.right = right + "px";
-        tMini.style.bottom = bottom + "px";
+    // 위치 정보를 로컬 스토리지에 저장
+    const position = {
+        right: parseFloat(tMini.style.right),
+        bottom: parseFloat(tMini.style.bottom)
+    };
+    localStorage.setItem("tBallP", JSON.stringify(position));
 
-    }
+    // 드래그 타임아웃 초기화
+    clearTimeout(dragTimeout);
+}
 
-    function handleIconDragEnd() {
-        isDragging = false;
+// 터치 이벤트 핸들러
+function handleIconTouchStart(e) {
+    if (isDragging) return; // 드래그 중이면 클릭 이벤트를 차단
 
-        // 위치 정보를 로컬 스토리지에 저장
-        const position = {
-            right: parseFloat(tMini.style.right),
-            bottom: parseFloat(tMini.style.bottom)
-        };
-        localStorage.setItem("tBallP", JSON.stringify(position));
+    // 터치 다운 이벤트가 발생하면 타임아웃을 설정하고 클릭을 길게 눌렀는지 확인합니다.
+    dragTimeout = setTimeout(function() {
+        isDragging = true;
 
-        // 드래그 타임아웃 초기화
-        clearTimeout(dragTimeout);
-    }
-    // 아이콘 이동 함수
-    function handleIconTouchStart(e) {
-        // 터치 다운 이벤트가 발생하면 타임아웃을 설정하고 클릭을 길게 눌렀는지 확인합니다.
-        dragTimeout = setTimeout(function() {
-            isDragging = true;
-
-            // 드래그가 시작된 위치 저장
-            const touch = e.touches[0];
-            offsetX = touch.clientX - tMini.getBoundingClientRect().right + tMini.offsetWidth;
-            offsetY = touch.clientY - tMini.getBoundingClientRect().bottom + tMini.offsetHeight;
-            // 이벤트 기본 동작 막기
-            e.preventDefault();
-        }, 500);
-
-    }
-
-    function handleIconTouchMove(e) {
-        if (!isDragging) return;
-        // 이벤트 기본 동작 막기
-        e.preventDefault();
-
-        // 새로운 위치 계산
+        // 드래그가 시작된 위치 저장
         const touch = e.touches[0];
-        let right = window.innerWidth - touch.clientX - offsetX;
-        let bottom = window.innerHeight - touch.clientY - offsetY;
+        offsetX = touch.clientX - tMini.getBoundingClientRect().right + tMini.offsetWidth;
+        offsetY = touch.clientY - tMini.getBoundingClientRect().bottom + tMini.offsetHeight;
+        // 이벤트 기본 동작 막기
+        e.preventDefault();
+    }, 500);
+}
 
-        // div를 새 위치로 이동
-        right = Math.min(Math.max(0, right), window.innerWidth - tMini.offsetWidth);
-        bottom = Math.min(Math.max(0, bottom), window.innerHeight - tMini.offsetHeight);
+function handleIconTouchMove(e) {
+    if (!isDragging) return;
+    // 이벤트 기본 동작 막기
+    e.preventDefault();
 
-        tMini.style.right = right + "px";
-        tMini.style.bottom = bottom + "px";
-    }
+    // 새로운 위치 계산
+    const touch = e.touches[0];
+    let right = window.innerWidth - touch.clientX - offsetX;
+    let bottom = window.innerHeight - touch.clientY - offsetY;
 
-    function handleIconTouchEnd() {
-        isDragging = false;
+    // div를 새 위치로 이동
+    right = Math.min(Math.max(0, right), window.innerWidth - tMini.offsetWidth);
+    bottom = Math.min(Math.max(0, bottom), window.innerHeight - tMini.offsetHeight);
 
-        // 위치 정보를 로컬 스토리지에 저장
-        const position = {
-            right: parseFloat(tMini.style.right),
-            bottom: parseFloat(tMini.style.bottom)
-        };
-        localStorage.setItem("tBallP", JSON.stringify(position));
+    tMini.style.right = right + "px";
+    tMini.style.bottom = bottom + "px";
+}
 
-        // 드래그 타임아웃 초기화
-        clearTimeout(dragTimeout);
-    }
+function handleIconTouchEnd() {
+    isDragging = false;
 
-    // 터치 이벤트 핸들러
-    tMini.addEventListener("touchstart", handleIconTouchStart);
-    document.addEventListener("touchmove", handleIconTouchMove);
-    document.addEventListener("touchend", handleIconTouchEnd);
+    // 위치 정보를 로컬 스토리지에 저장
+    const position = {
+        right: parseFloat(tMini.style.right),
+        bottom: parseFloat(tMini.style.bottom)
+    };
+    localStorage.setItem("tBallP", JSON.stringify(position));
 
-    // 마우스 이벤트 핸들러는 그대로 유지
-    tMini.addEventListener("mousedown", handleIconMouseDown);
-    document.addEventListener("mousemove", handleIconDrag);
-    document.addEventListener("mouseup", handleIconDragEnd);
+    // 드래그 타임아웃 초기화
+    clearTimeout(dragTimeout);
+}
+
+// 터치 이벤트 핸들러
+tMini.addEventListener("touchstart", handleIconTouchStart);
+document.addEventListener("touchmove", handleIconTouchMove);
+document.addEventListener("touchend", handleIconTouchEnd);
+
+// 마우스 이벤트 핸들러는 그대로 유지
+tMini.addEventListener("mousedown", handleIconMouseDown);
+document.addEventListener("mousemove", handleIconDrag);
+document.addEventListener("mouseup", handleIconDragEnd);
+
 
     // 설정창 ⚙️
     var nsSettingsDiv = document.createElement('div');
@@ -666,21 +664,12 @@ h1, h2, h3 {
         <input type="text" style="width:60%"  class="ns-input" id="geminiApi" value="${localStorage.getItem('geminiApi') || ''}"><br>
         <label for="geminiModel">모델 선택: </label>
         <select id="geminiModel" style="width:65%" class="ns-input">
-            <option value="gemini-2.0-flash-thinking-exp">gemini-2.0-flash-thinking-exp</option>
+            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
             <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp</option>
+            <option value="gemini-2.0-flash-thinking-exp">gemini-2.0-flash-thinking-exp</option>
             <option value="gemini-exp-1206">gemini-exp-1206</option>
             <option value="gemini-exp-1121">gemini-exp-1121</option>
-            <option value="gemini-1.5-pro-latest">gemini-1.5-pro-latest</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-            <option value="gemini-1.5-pro-001">gemini-1.5-pro-001</option>
-            <option value="gemini-1.5-pro-002">gemini-1.5-pro-002</option>
-            <option value="gemini-1.5-flash-8b-latest">gemini-1.5-flash-8b-latest</option>
-            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
-            <option value="gemini-1.5-flash-8b-001">gemini-1.5-flash-8b-001</option>
-            <option value="gemini-1.5-flash-latest">gemini-1.5-flash-latest</option>
-            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-            <option value="gemini-1.5-flash-001">gemini-1.5-flash-001</option>
-            <option value="gemini-1.5-flash-002">gemini-1.5-flash-002</option>
+            <option value="gemini-2.0-pro-exp-02-05">gemini-2.0-pro-exp-02-05</option>
         </select><br>
   
         <label for="geminiPrompt">영한 번역 프롬프트: </label>
