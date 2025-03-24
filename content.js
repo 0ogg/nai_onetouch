@@ -1,3 +1,12 @@
+// ==UserScript==
+// @name         깡갤 노벨 AI 원터치 번역 
+// @namespace    https://novelai.net/
+// @version      4.0
+// @description  novel ai 보조툴 - 개선된 UI/UX와 코드 구조
+// @author       ㅇㅇ 
+// @match        https://novelai.net/*
+// @grant        none
+// ==/UserScript==
 
 (function() {
     'use strict';
@@ -46,8 +55,6 @@ const CONFIG = {
     *   자연어 문장은 전체적인 상황보다 그 캐릭터가 마지막으로 한 구체적인 행동을 서술하세요.
 
 **캐릭터 정보(이 목록의 캐릭터들은 사용자가 사전에 정보를 등록해둔 캐릭터일 뿐 반드시 등장하는 건 아님. 이름이 일치하고 삽화에 등장하는 경우에만 정보를 노출하시오. 이외의 캐릭터는 소설 서술을 기반으로 정리하세요.):**
-Yuri: girl, yuri, black hair, purple eyes, sharp eyes, low ponytail, glasses,
-Hazama: boy, hazama (blazblue), green hair, yellow eyes,
 
 **사용 가능 태그(우리 사이트는 Danbooru와 연계합니다. 호환을 위해Danbooru 사이트에서 실제로 사용되는 이미지 태그들을 참고하여 사용하세요.):**
 
