@@ -1,13 +1,3 @@
-// ==UserScript==
-// @name         깡갤 노벨 AI 원터치 번역 
-// @namespace    https://novelai.net/
-// @version      4.0
-// @description  novel ai 보조툴 - 개선된 UI/UX와 코드 구조
-// @author       ㅇㅇ 
-// @match        https://novelai.net/*
-// @grant        none
-// ==/UserScript==
-
 (function() {
     'use strict';
 
